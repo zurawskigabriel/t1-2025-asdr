@@ -1,3 +1,59 @@
+
+/*
+  Prog -->  ListaDecl
+
+  ListaDecl -->  DeclVar  ListaDecl
+              |  DeclFun  ListaDecl
+              |  (*vazio*)
+
+  DeclVar --> Tipo ListaIdent ';' DeclVar
+            | (*vazio*)
+
+  Tipo --> int 
+         | double 
+         | boolean
+
+  ListaIdent --> IDENT , ListaIdent  
+               | IDENT      
+
+  DeclFun --> FUNC tipoOuVoid IDENT '(' FormalPar ')' '{' DeclVar ListaCmd '}' DeclFun
+            | (*vazio*)
+
+  TipoOuVoid --> Tipo | VOID
+
+  FormalPar -> paramList | (*vazio*)
+
+  paramList --> Tipo IDENT , ParamList
+              | Tipo IDENT 
+
+  Bloco --> { ListaCmd }
+
+  ListaCmd --> Cmd ListaCmd
+    |    (*vazio*)
+
+  Cmd --> Bloco
+      | while ( E ) Cmd
+      | IDENT = E ;
+      | if ( E ) Cmd RestoIf
+
+  RestoIf -> else Cmd
+        |    (*vazio*)
+
+  E --> E + T
+      | E - T
+      | T
+
+  T --> T * F
+      | T / F
+      | F    
+      
+  F -->  IDENT
+      | NUM
+      | ( E )
+
+*/
+
+
 import java.io.*;
 
 public class AsdrSample {
@@ -9,7 +65,12 @@ public class AsdrSample {
   public static final int WHILE  = 303;
   public static final int IF	 = 304;
   public static final int FI	 = 305;
-  public static final int ELSE = 306;
+  public static final int ELSE = 306; 
+  public static final int INT = 307;            // Adicionado pro trabalho             
+  public static final int DOUBLE = 308;         // Adicionado pro trabalho 
+  public static final int BOOLEAN = 309;        // Adicionado pro trabalho 
+
+  
 
     public static final String tokenList[] = 
       {"IDENT",
@@ -17,7 +78,11 @@ public class AsdrSample {
 		 "WHILE", 
 		 "IF", 
 		 "FI",
-		 "ELSE"  };
+		 "ELSE", 
+       "INT",              // Adicionado pro trabalho
+       "DOUBLE",           // Adicionado pro trabalho
+       "BOOLEAN"           // Adicionado pro trabalho
+       };
                                       
   /* referencia ao objeto Scanner gerado pelo JFLEX */
   private Yylex lexer;
