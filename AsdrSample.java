@@ -71,12 +71,26 @@ public class AsdrSample {
 ***/ 
 
   private void Prog() {
-      if (laToken == '{') {
-         if (debug) System.out.println("Prog --> Bloco");
+      if (laToken == INT || laToken == DOUBLE || laTOken == BOOLEAN || '{' ) {
+         if (debug) System.out.println("Prog --> ListaDeclVar Bloco");
+         ListaDeclVar();
          Bloco();
       }
       else 
-        yyerror("esperado '{'");
+        yyerror("esperado int, double, boolean, ou '{'");
+   }
+
+   private ListaDeclaVar(){
+      if (laToken == INT || laToken  == DOUBLE || laToken == BOOLEAN){
+         DeclVar();
+         ListaDeclVar();
+      }
+   }
+
+   private void DeclVar(){
+      Tipo();
+      ListaIdent();
+      verifica(';');
    }
 
   private void Bloco() {
