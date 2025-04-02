@@ -69,8 +69,8 @@ public class AsdrSample {
   public static final int INT = 307;            // Adicionado pro trabalho             
   public static final int DOUBLE = 308;         // Adicionado pro trabalho 
   public static final int BOOLEAN = 309;        // Adicionado pro trabalho 
-
-  
+  public static final int FUNC = 310;           // Adicionado pro trabalho
+  public static final int VOID = 311;           // Adicionado pro trabalho
 
     public static final String tokenList[] = 
       {"IDENT",
@@ -81,7 +81,9 @@ public class AsdrSample {
 		 "ELSE", 
        "INT",              // Adicionado pro trabalho
        "DOUBLE",           // Adicionado pro trabalho
-       "BOOLEAN"           // Adicionado pro trabalho
+       "BOOLEAN",          // Adicionado pro trabalho
+       "FUNC",             // Adicionado pro trabalho
+       "VOID"              // Adicionado pro trabalho
        };
                                       
   /* referencia ao objeto Scanner gerado pelo JFLEX */
@@ -145,7 +147,7 @@ public class AsdrSample {
         yyerror("esperado int, double, boolean, ou '{'");
    }
 
-   private ListaDeclaVar(){
+   private ListaDeclVar(){
       if (laToken == INT || laToken  == DOUBLE || laToken == BOOLEAN){
          DeclVar();
          ListaDeclVar();

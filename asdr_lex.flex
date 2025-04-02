@@ -26,6 +26,8 @@ WHITE_SPACE_CHAR=[\n\r\ \t\b\012]
 "if"		{ return AsdrSample.IF; }
 "else"		{ return AsdrSample.ELSE; }
 "fi"		{ return AsdrSample.FI; }
+"func" { return AsdrSample.FUNC; }
+"void" { return AsdrSample.VOID; }
 
 [:jletter:][:jletterdigit:]* { return AsdrSample.IDENT; }  
 
