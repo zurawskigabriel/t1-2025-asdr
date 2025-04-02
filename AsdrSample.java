@@ -1,60 +1,5 @@
-
-/*
-  Prog -->  ListaDecl
-
-  ListaDecl -->  DeclVar  ListaDecl
-              |  DeclFun  ListaDecl
-              |  (*vazio*)
-
-  DeclVar --> Tipo ListaIdent ';' DeclVar
-            | (*vazio*)
-
-  Tipo --> int 
-         | double 
-         | boolean
-
-  ListaIdent --> IDENT , ListaIdent  
-               | IDENT      
-
-  DeclFun --> FUNC tipoOuVoid IDENT '(' FormalPar ')' '{' DeclVar ListaCmd '}' DeclFun
-            | (*vazio*)
-
-  TipoOuVoid --> Tipo | VOID
-
-  FormalPar -> paramList | (*vazio*)
-
-  paramList --> Tipo IDENT , ParamList
-              | Tipo IDENT 
-
-  Bloco --> { ListaCmd }
-
-  ListaCmd --> Cmd ListaCmd
-    |    (*vazio*)
-
-  Cmd --> Bloco
-      | while ( E ) Cmd
-      | IDENT = E ;
-      | if ( E ) Cmd RestoIf
-
-  RestoIf -> else Cmd
-        |    (*vazio*)
-
-  E --> E + T
-      | E - T
-      | T
-
-  T --> T * F
-      | T / F
-      | F    
-      
-  F -->  IDENT
-      | NUM
-      | ( E )
-
-*/
-
-
 import java.io.*;
+import java.lang.annotation.ElementType;
 
 public class AsdrSample {
 
@@ -100,172 +45,408 @@ public class AsdrSample {
       lexer = new Yylex (r, this);
   }
 
-  /***** Gramática original 
-  Prog -->  Bloco
-
-  Bloco --> { Cmd }
-
-  Cmd --> Bloco
-      | while ( E ) Cmd
-      | ident = E ;
-      | if ( E ) Cmd 
-      | if ( E ) Cmd else Cmd 
-
-  E --> IDENT
-   | NUM
-   | ( E )
-***/  
-
-  /***** Gramática 'fatorada' 
-  Prog -->  Bloco
-
-  Bloco --> { Cmd }
-
-  Cmd --> Bloco
-      | while ( E ) Cmd
-      | ident = E ;
-      | if ( E ) Cmd RestoIf   // 'fatorada à esquerda'
-      
-   RestoIf --> else Cmd 
-            | 
-
-  E --> E + T
-      | T
-
-  T --> IDENT
-   | NUM
-   | ( E )
-***/ 
-
   private void Prog() {
-      if (laToken == INT || laToken == DOUBLE || laTOken == BOOLEAN || '{' ) {
+      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN || laToken == '{' ) {
          if (debug) System.out.println("Prog --> ListaDeclVar Bloco");
-         ListaDeclVar();
-         Bloco();
+         ListaDecl();
       }
       else 
         yyerror("esperado int, double, boolean, ou '{'");
    }
 
-   private ListaDeclVar(){
-      if (laToken == INT || laToken  == DOUBLE || laToken == BOOLEAN){
-         DeclVar();
-         ListaDeclVar();
+   private void ListaDecl() {
+      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN || laToken == FUNC) {
+         if (debug) System.out.println("ListaDecl --> Decl ListaDecl");
+         Decl();
+         ListaDecl();
+      } else {
+         if (debug) System.out.println("ListaDecl --> * vazio *");
       }
    }
 
-   private void DeclVar(){
-      Tipo();
-      ListaIdent();
-      verifica(';');
+   private void Decl() {
+      // Tipo ListaIdent ';'  
+      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN) {
+         if (debug) System.out.println("Decl --> Tipo ListaIdent ';'");
+         Tipo();
+         ListaIdent();
+         verifica(';');
+      }
+      else if (laToken == FUNC) {
+         if (debug) System.out.println("Decl --> FUNC TipoOuVoid IDENT '(' FormalPar ')' '{' ListaDeclVarLocal ListaCmd '}'");
+         verifica(FUNC);
+         TipoOuVoid();
+         verifica(IDENT);
+         verifica('(');
+         FormalPar();
+         verifica('(');
+         verifica('{');
+         ListaDeclVarLocal();
+         ListaCmd();
+      }
+      else 
+         yyerror("esperado Decl --> ...");
    }
 
-  private void Bloco() {
-      if (debug) System.out.println("Bloco --> { Cmd }");
-      //if (laToken == '{') {
-         verifica('{');
-         Cmd();
-         verifica('}');
-      //}
-  }
+   private void ListaDeclVarLocal() {
+      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN) {
+         if (debug) System.out.println("ListaDeclVarLocal --> Tipo ListaIdent ';' ListaDeclVarLocal");
+         Tipo();
+         ListaIdent();
+         verifica(';');
+         ListaDeclVarLocal();
+      } else { // vazio
+         if (debug) System.out.println("ListaDeclVarLocal --> * vazio *");
+      }
+   }
 
-  private void Cmd() {
+   private void Tipo() {
+      if (laToken == INT) {
+         if (debug) System.out.println("Tipo --> int");
+         verifica(INT);
+      }
+
+      else if (laToken == DOUBLE) {
+         if (debug) System.out.println("Tipo --> double");
+         verifica(DOUBLE);
+      }
+
+      else if (laToken == BOOLEAN) {
+         if (debug) System.out.println("Tipo --> boolean");
+         verifica(BOOLEAN);
+      }
+
+      else {
+         yyerror("esperado Tipo --> [INT|DOUBLE|BOOLEAN]");
+      }
+   }
+
+   private void ListaIdent() {
+      if (debug) System.out.println("ListaIdent --> IDENT ListaIdent'");
+      verifica(IDENT);
+      ListaIdent_();
+   }
+
+   private void ListaIdent_() {
+      // ListaIdent' --> , ListaIdent | /* vazio */
+      if (laToken == IDENT) {
+         verifica(',');
+         ListaIdent();
+      } else { // vazio
+         if (debug) System.out.println("ListaIdent' --> * vazio *");
+      }
+   }
+
+   private void TipoOuVoid() {
+      // TipoOuVoid --> Tipo | VOID
+      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN) {
+         if (debug) System.out.println("TipoOuVoid --> Tipo");
+         Tipo();
+      } else if (laToken == VOID) {
+         if (debug) System.out.println("TipoOuVoid --> VOID");
+         verifica(VOID);
+      } else {
+         yyerror("esperado Tipo --> ...");
+      }
+   }
+
+   // FormalPar --> ParamList |  /* vazio */\
+   private void FormalPar() {
+      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN) {
+         ParamList();
+      }
+      else { // vazio
+         if (debug) System.out.println("FormalPar --> *vazio*");
+      }
+   }
+
+   
+   private void ParamList() {
+      if (debug) System.out.println("ParamList --> Tipo IDENT ParamListTail");
+      Tipo();
+      verifica(IDENT);
+      ParamListTail();
+   }
+
+   // ParamListTail --> , ParamList | /* vazio */
+
+   private void ParamListTail() {
+      if (laToken == ',') {
+         verifica(',');
+         ParamList();
+      } else { // vazio
+         if (debug) System.out.println("ParamListTail --> *vazio*");
+      }
+   }
+
+   private void Bloco() {
+      if (debug) System.out.println("Bloco --> '{' ListaCmd '}'");
+      verifica('{');
+      ListaCmd();
+      verifica('}');
+   }
+
+   // ListaCmd --> Cmd ListaCmd | /* vazio */
+   private void ListaCmd() {
+      if (laToken == '{' || laToken == WHILE || laToken == IDENT || laToken == IF) {
+         if (debug) System.out.println("ListaCmd --> Cmd ListaCmd");
+         Cmd();
+         ListaCmd();
+      } else {
+         if (debug) System.out.println("ListaCmd -> *vazio*");
+      }
+   }
+
+   private void Cmd() {
       if (laToken == '{') {
-         if (debug) System.out.println("Cmd --> Bloco");
+         if (debug) System.out.println("Cmd -> Bloco");
          Bloco();
-	   }    
-      else if (laToken == WHILE) {
-         if (debug) System.out.println("Cmd --> WHILE ( E ) Cmd");
-         verifica(WHILE);    // laToken = this.yylex(); 
-  		   verifica('(');
-  		   E();
+      }
+
+      else if(laToken == WHILE) {
+         if (debug) System.out.println("Cmd -> WHILE '(' E ')' Cmd");
+         verifica(WHILE);
+         verifica('(');
+         E();
          verifica(')');
          Cmd();
-	   }
-      else if (laToken == IDENT ) {
-         if (debug) System.out.println("Cmd --> IDENT = E ;");
-            verifica(IDENT);  
-            verifica('='); 
-            E();
-		      verifica(';');
-	   }
-    else if (laToken == IF) {
-         if (debug) System.out.println("Cmd --> if (E) Cmd RestoIF");
+      }
+
+      else if (laToken == IDENT) {
+         if (debug) System.out.println("Cmd -> IDENT '=' E ';'");
+         verifica(IDENT);
+         verifica('=');
+         E();
+         verifica(';');
+      }
+
+      else if (laToken == IF) {
+         if (debug) System.out.println("Cmd -> IF '(' E ')' Cmd RestoIf");
          verifica(IF);
          verifica('(');
-  		   E();
+         E();
          verifica(')');
          Cmd();
-         RestoIF();
-	   }
- 	else yyerror("Esperado {, if, while ou identificador");
+         RestoIf();
+      } else {
+         yyerror("Esperado Cmd -> ...");
+      }
    }
 
-
-   private void RestoIF() {
-       if (laToken == ELSE) {
-         if (debug) System.out.println("RestoIF --> else Cmd FI ");
+   private void RestoIf() {
+      if (laToken == ELSE) {
+         if (debug) System.out.println("RestoIf --> ELSE Cmd");
          verifica(ELSE);
          Cmd();
-         
-    
-	   } else {
-         if (debug) System.out.println("RestoIF -->  (*vazio*)  ");
-         // aceitar como vazio  <-- my way
-         // ou testar o follow de RestoIF
-         }
-     }     
-
-   private void E() {
-         if (laToken == IDENT || laToken == NUM || laToken == '(') {
-          if (debug) System.out.println("E --> T R");
-         T();
-         R();
-         }
-         else yyerror("Esperado operando (, identificador ou numero");
+      } else {
+         if (debug) System.out.println("RestoIf -> *vazio*");
       }
-      
+   }
 
-   private void R() {
+   // E --> T E'
+   private void E() {
+      if (debug) System.out.println("E --> T E'");
+      T();
+      E_();
+   }
+
+
+   // E' --> '+' T E' | '-' T E' | /* vazio */
+   private void E_() {
       if (laToken == '+') {
-         if (debug) System.out.println("R --> + T R");
+         if (debug) System.out.println("E' --> '+' T E'");
          verifica('+');
          T();
-         R();
+         E_();
       }
-      else   if (laToken == '-') {
-         if (debug) System.out.println("R --> - T R");
+
+      else if (laToken == '-') {
+         if (debug) System.out.println("E' --> '-' T E'");
          verifica('-');
          T();
-         R();
+         E_();
+      } else {
+         if (debug) System.out.println("E' --> *vazio*");
       }
-      else {
-         if (debug) System.out.println("R -->  (*vazio*)  ");
-         // aceitar como vazio  <-- my way
-         // ou testar o follow de R
-         }
-   }  
-
-
-
-
-  private void T() {
-      if (laToken == IDENT) {
-         if (debug) System.out.println("T --> IDENT");
-         verifica(IDENT);
-	   }
-      else if (laToken == NUM) {
-         if (debug) System.out.println("T --> NUM");
-         verifica(NUM);
-	   }
-      else if (laToken == '(') {
-         if (debug) System.out.println("T --> ( E )");
-         verifica('(');
-         E();        
-		 verifica(')');
-	   }
- 	else yyerror("Esperado operando (, identificador ou numero");
    }
+
+   // T --> F T'
+   private void T() {
+      if (debug) System.out.println("T --> F T'");
+      F();
+      T_();
+   }
+
+   // T' --> '*' F T' | '/' F T' | /* vazio */
+   private void T_() {
+      if (laToken == '*') {
+         if (debug) System.out.println("T' --> '*' F T'");
+         verifica('*');
+         F();
+         T_();
+      }
+
+      else if (laToken == '/') {
+         if (debug) System.out.println("T' --> '/' F T'");
+         verifica('/');
+         F();
+         T_();
+   } 
+      
+      else { // vazio
+         if (debug) System.out.println("T --> *vazio*");
+      }
+   }
+
+   // F --> IDENT | NUM | '(' E ')'
+
+   private void F() {
+      if (laToken == IDENT) {
+         if (debug) System.out.println("F --> IDENT");
+         verifica(IDENT);
+      }
+
+      else if (laToken == NUM) {
+         if (debug) System.out.println("F --> NUM");
+         verifica(NUM);
+      }
+      else if (laToken == '(') {
+         if (debug) System.out.println("F --> '(' E ')'");
+         verifica('(');
+         E();
+         verifica(')');
+      }
+   }
+
+
+
+//    private void ListaDeclVar(){
+//       if (laToken == INT || laToken  == DOUBLE || laToken == BOOLEAN){
+//          DeclVar();
+//          ListaDeclVar();
+//       }
+//    }
+
+//    private void DeclVar(){
+//       Tipo();
+//       ListaIdent();
+//       verifica(';');
+//    }
+
+//    private void Tipo() {
+
+//    }
+
+//    private void ListaIdent() {
+
+//    }
+
+//   private void Bloco() {
+//       if (debug) System.out.println("Bloco --> { Cmd }");
+//       //if (laToken == '{') {
+//          verifica('{');
+//          Cmd();
+//          verifica('}');
+//       //}
+//   }
+
+//   private void Cmd() {
+//       if (laToken == '{') {
+//          if (debug) System.out.println("Cmd --> Bloco");
+//          Bloco();
+// 	   }    
+//       else if (laToken == WHILE) {
+//          if (debug) System.out.println("Cmd --> WHILE ( E ) Cmd");
+//          verifica(WHILE);    // laToken = this.yylex(); 
+//   		   verifica('(');
+//   		   E();
+//          verifica(')');
+//          Cmd();
+// 	   }
+//       else if (laToken == IDENT ) {
+//          if (debug) System.out.println("Cmd --> IDENT = E ;");
+//             verifica(IDENT);  
+//             verifica('='); 
+//             E();
+// 		      verifica(';');
+// 	   }
+//     else if (laToken == IF) {
+//          if (debug) System.out.println("Cmd --> if (E) Cmd RestoIF");
+//          verifica(IF);
+//          verifica('(');
+//   		   E();
+//          verifica(')');
+//          Cmd();
+//          RestoIF();
+// 	   }
+//  	else yyerror("Esperado {, if, while ou identificador");
+//    }
+
+
+//    private void RestoIF() {
+//        if (laToken == ELSE) {
+//          if (debug) System.out.println("RestoIF --> else Cmd FI ");
+//          verifica(ELSE);
+//          Cmd();
+         
+    
+// 	   } else {
+//          if (debug) System.out.println("RestoIF -->  (*vazio*)  ");
+//          // aceitar como vazio  <-- my way
+//          // ou testar o follow de RestoIF
+//          }
+//      }     
+
+//    private void E() {
+//          if (laToken == IDENT || laToken == NUM || laToken == '(') {
+//           if (debug) System.out.println("E --> T R");
+//          T();
+//          R();
+//          }
+//          else yyerror("Esperado operando (, identificador ou numero");
+//       }
+      
+
+//    private void R() {
+//       if (laToken == '+') {
+//          if (debug) System.out.println("R --> + T R");
+//          verifica('+');
+//          T();
+//          R();
+//       }
+//       else   if (laToken == '-') {
+//          if (debug) System.out.println("R --> - T R");
+//          verifica('-');
+//          T();
+//          R();
+//       }
+//       else {
+//          if (debug) System.out.println("R -->  (*vazio*)  ");
+//          // aceitar como vazio  <-- my way
+//          // ou testar o follow de R
+//          }
+//    }  
+
+
+
+
+//   private void T() {
+//       if (laToken == IDENT) {
+//          if (debug) System.out.println("T --> IDENT");
+//          verifica(IDENT);
+// 	   }
+//       else if (laToken == NUM) {
+//          if (debug) System.out.println("T --> NUM");
+//          verifica(NUM);
+// 	   }
+//       else if (laToken == '(') {
+//          if (debug) System.out.println("T --> ( E )");
+//          verifica('(');
+//          E();        
+// 		 verifica(')');
+// 	   }
+//  	else yyerror("Esperado operando (, identificador ou numero");
+//    }
 
 
   private void verifica(int expected) {
