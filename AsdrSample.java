@@ -13,20 +13,18 @@ public class AsdrSample {
   public static final int NUM 	 = 302;
   public static final int WHILE  = 303;
   public static final int IF	 = 304;
-  public static final int FI	 = 305;
-  public static final int ELSE = 306; 
-  public static final int INT = 307;            // Adicionado pro trabalho             
-  public static final int DOUBLE = 308;         // Adicionado pro trabalho 
-  public static final int BOOLEAN = 309;        // Adicionado pro trabalho 
-  public static final int FUNC = 310;           // Adicionado pro trabalho
-  public static final int VOID = 311;           // Adicionado pro trabalho
+  public static final int ELSE = 305; 
+  public static final int INT = 306;            // Adicionado pro trabalho             
+  public static final int DOUBLE = 307;         // Adicionado pro trabalho 
+  public static final int BOOLEAN = 308;        // Adicionado pro trabalho 
+  public static final int FUNC = 309;           // Adicionado pro trabalho
+  public static final int VOID = 310;           // Adicionado pro trabalho
 
     public static final String tokenList[] = 
       {"IDENT",
 		 "NUM", 
 		 "WHILE", 
 		 "IF", 
-		 "FI",
 		 "ELSE", 
        "INT",              // Adicionado pro trabalho
        "DOUBLE",           // Adicionado pro trabalho
@@ -50,12 +48,8 @@ public class AsdrSample {
   }
 
   private void Prog() {
-      if (laToken == INT || laToken == DOUBLE || laToken == BOOLEAN || laToken == '{' ) {
-         if (debug) System.out.println("Prog --> ListaDeclVar Bloco");
-         ListaDecl();
-      }
-      else 
-        yyerror("esperado int, double, boolean, ou '{'");
+      if (debug) System.out.println("Prog --> ListaDecl");
+      ListaDecl();
    }
 
    private void ListaDecl() {
@@ -64,7 +58,7 @@ public class AsdrSample {
          Decl();
          ListaDecl();
       } else {
-         if (debug) System.out.println("ListaDecl --> * vazio * " + laToken);
+         if (debug) System.out.println("ListaDecl --> * vazio * ");
       }
    }
 
@@ -83,9 +77,11 @@ public class AsdrSample {
          verifica(IDENT);
          verifica('(');
          FormalPar();
-         verifica('(');
+         verifica(')');
          verifica('{');
          ListaDeclVarLocal();
+         ListaCmd();
+         verifica('}');
          ListaCmd();
       }
       else 
@@ -133,7 +129,7 @@ public class AsdrSample {
 
    private void ListaIdent_() {
       // ListaIdent' --> , ListaIdent | /* vazio */
-      if (laToken == IDENT) {
+      if (laToken == ',') {
          verifica(',');
          ListaIdent();
       } else { // vazio
