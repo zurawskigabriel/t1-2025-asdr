@@ -1,3 +1,7 @@
+/**
+ * @author Anderson Sprenger, Gabriel Zurawski
+ */
+
 import java.io.*;
 import java.lang.annotation.ElementType;
 
@@ -60,7 +64,7 @@ public class AsdrSample {
          Decl();
          ListaDecl();
       } else {
-         if (debug) System.out.println("ListaDecl --> * vazio *");
+         if (debug) System.out.println("ListaDecl --> * vazio * " + laToken);
       }
    }
 
@@ -315,139 +319,10 @@ public class AsdrSample {
          verifica('(');
          E();
          verifica(')');
+      } else {
+         yyerror("Esperado F -> ...");
       }
    }
-
-
-
-//    private void ListaDeclVar(){
-//       if (laToken == INT || laToken  == DOUBLE || laToken == BOOLEAN){
-//          DeclVar();
-//          ListaDeclVar();
-//       }
-//    }
-
-//    private void DeclVar(){
-//       Tipo();
-//       ListaIdent();
-//       verifica(';');
-//    }
-
-//    private void Tipo() {
-
-//    }
-
-//    private void ListaIdent() {
-
-//    }
-
-//   private void Bloco() {
-//       if (debug) System.out.println("Bloco --> { Cmd }");
-//       //if (laToken == '{') {
-//          verifica('{');
-//          Cmd();
-//          verifica('}');
-//       //}
-//   }
-
-//   private void Cmd() {
-//       if (laToken == '{') {
-//          if (debug) System.out.println("Cmd --> Bloco");
-//          Bloco();
-// 	   }    
-//       else if (laToken == WHILE) {
-//          if (debug) System.out.println("Cmd --> WHILE ( E ) Cmd");
-//          verifica(WHILE);    // laToken = this.yylex(); 
-//   		   verifica('(');
-//   		   E();
-//          verifica(')');
-//          Cmd();
-// 	   }
-//       else if (laToken == IDENT ) {
-//          if (debug) System.out.println("Cmd --> IDENT = E ;");
-//             verifica(IDENT);  
-//             verifica('='); 
-//             E();
-// 		      verifica(';');
-// 	   }
-//     else if (laToken == IF) {
-//          if (debug) System.out.println("Cmd --> if (E) Cmd RestoIF");
-//          verifica(IF);
-//          verifica('(');
-//   		   E();
-//          verifica(')');
-//          Cmd();
-//          RestoIF();
-// 	   }
-//  	else yyerror("Esperado {, if, while ou identificador");
-//    }
-
-
-//    private void RestoIF() {
-//        if (laToken == ELSE) {
-//          if (debug) System.out.println("RestoIF --> else Cmd FI ");
-//          verifica(ELSE);
-//          Cmd();
-         
-    
-// 	   } else {
-//          if (debug) System.out.println("RestoIF -->  (*vazio*)  ");
-//          // aceitar como vazio  <-- my way
-//          // ou testar o follow de RestoIF
-//          }
-//      }     
-
-//    private void E() {
-//          if (laToken == IDENT || laToken == NUM || laToken == '(') {
-//           if (debug) System.out.println("E --> T R");
-//          T();
-//          R();
-//          }
-//          else yyerror("Esperado operando (, identificador ou numero");
-//       }
-      
-
-//    private void R() {
-//       if (laToken == '+') {
-//          if (debug) System.out.println("R --> + T R");
-//          verifica('+');
-//          T();
-//          R();
-//       }
-//       else   if (laToken == '-') {
-//          if (debug) System.out.println("R --> - T R");
-//          verifica('-');
-//          T();
-//          R();
-//       }
-//       else {
-//          if (debug) System.out.println("R -->  (*vazio*)  ");
-//          // aceitar como vazio  <-- my way
-//          // ou testar o follow de R
-//          }
-//    }  
-
-
-
-
-//   private void T() {
-//       if (laToken == IDENT) {
-//          if (debug) System.out.println("T --> IDENT");
-//          verifica(IDENT);
-// 	   }
-//       else if (laToken == NUM) {
-//          if (debug) System.out.println("T --> NUM");
-//          verifica(NUM);
-// 	   }
-//       else if (laToken == '(') {
-//          if (debug) System.out.println("T --> ( E )");
-//          verifica('(');
-//          E();        
-// 		 verifica(')');
-// 	   }
-//  	else yyerror("Esperado operando (, identificador ou numero");
-//    }
-
 
   private void verifica(int expected) {
       if (laToken == expected)
