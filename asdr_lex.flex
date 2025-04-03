@@ -1,3 +1,6 @@
+/**
+ * @author Anderson Sprenger, Gabriel Zurawski
+ */
 %%
 
 %{
@@ -34,6 +37,7 @@ WHITE_SPACE_CHAR=[\n\r\ \t\b\012]
 
 [:jletter:][:jletterdigit:]* { return AsdrSample.IDENT; }  
 
+[0-9]+ \. [0-9]+ { return AsdrSample.NUM; }
 [0-9]+ 	{ return AsdrSample.NUM; }
 
 "{" |
@@ -42,6 +46,7 @@ WHITE_SPACE_CHAR=[\n\r\ \t\b\012]
 "(" |
 ")" |
 "+" |
+"-" |
 "=" |
 "," |
 "*" |
