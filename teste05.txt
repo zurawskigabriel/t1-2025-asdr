@@ -1,0 +1,6 @@
+int globalVar;
+
+func void setup() {
+    globalVar = 10;
+    globalVar = globalVar + 5;
+}

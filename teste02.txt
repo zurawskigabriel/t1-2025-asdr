@@ -1,0 +1,3 @@
+double pi;
+boolean active;
+int x, y, z;

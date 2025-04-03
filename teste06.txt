@@ -1,0 +1,24 @@
+int threshold;
+double factor;
+
+func void initialize() {
+    threshold = 100;
+    factor = 0.5;
+}
+
+func int processData(int data) {
+    int localResult;
+    boolean needsAdjustment;
+
+    localResult = data * 2;
+
+    if (needsAdjustment) {
+        localResult = localResult - 5;
+    } else {
+        localResult = localResult + 5;
+    }
+
+    while (localResult) {
+         localResult = localResult - 1;
+    }
+}
